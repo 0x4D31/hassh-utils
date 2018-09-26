@@ -1,8 +1,7 @@
 # Copyright (c) 2018, salesforce.com, inc.
 # All rights reserved.
 # Licensed under the BSD 3-Clause license.
-# For full license text, see the LICENSE file in the repo root
-# or https://opensource.org/licenses/BSD-3-Clause
+# For full license text, see https://opensource.org/licenses/BSD-3-Clause
 #
 # A dockerized version of hassh.py can be used to extract HASSH fingerprints from input PCAP files and live network traffic.
 #
