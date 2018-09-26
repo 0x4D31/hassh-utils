@@ -22,9 +22,10 @@ Credits: Ben Reardon, Adel Karimi, and JA3 crew
 -- @output
 -- PORT   STATE SERVICE
 -- 22/tcp open  ssh
--- | ssh-hassh:
+-- | ssh-hassh: 
+-- |   Server Identification String: SSH-2.0-libssh_0.7.0
 -- |   hasshServer: 85a34ecc072b7fee11a05e8208ffc2a2
--- |_  hasshServerAlgorithms: curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256;chacha20-poly1305@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr,aes256-cbc,aes192-cbc,aes128-cbc;hmac-sha2-256,hmac-sha2-512,hmac-sha1;none,zlib,zlib@openssh.com
+-- |_  hasshServer Algorithms: curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256;chacha20-poly1305@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr,aes256-cbc,aes192-cbc,aes128-cbc;hmac-sha2-256,hmac-sha2-512,hmac-sha1;none,zlib,zlib@openssh.com
 
 -- Used parts of the code from Kris Katterjohn's ssh2-enum-algos script
 author = "Adel '0x4d31' Karimi"
