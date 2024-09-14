@@ -18,15 +18,23 @@ Credits: Ben Reardon, Adel Karimi, and JA3 crew
 
 ---
 -- @usage
--- nmap --script ssh-hassh --script-args 'database=file,client_string=string' <target>
+-- nmap --script ssh-hassh --script-args 'database=file,client_string=string,skip_hasshdb' <target>
 --
 -- @output
--- PORT   STATE SERVICE
--- 22/tcp open  ssh
+--
+-- PORT   STATE SERVICE VERSION
+-- 22/tcp open  ssh     OpenSSH 9.2p1 Debian 2+deb12u2 (protocol 2.0)
 -- | ssh-hassh:
--- |   Server Identification String: SSH-2.0-OpenSSH_7.6p1 Ubuntu-4ubuntu0.3
--- |   hasshServer: b12d2871a1189eff20364cf5333619ee
--- |_  hasshServer Guess: SSH-2.0-OpenSSH_7.6p1 Ubuntu-4ubuntu0.3 (49%) || SSH-2.0-OpenSSH_7.4p1 Debian-10+deb9u6 (19%) || SSH-2.0-OpenSSH_7.4p1 Debian-10+deb9u7 (4%) || SSH-2.0-OpenSSH_7.4p1 Debian-10+deb9u4 (2%) || SSH-2.0-OpenSSH_7.9p1 Debian-10 (2%)
+-- |   hasshServer: a65c3b91f743d3f246e72172e77288f1
+-- |   Server Identification String: SSH-2.0-OpenSSH_9.2p1 Debian-2+deb12u2
+-- |   hasshServer Guess:            SSH-2.0-OpenSSH_9.2p1 Debian-2+deb12u3 (100+)
+-- |                             --> SSH-2.0-OpenSSH_9.2p1 Debian-2+deb12u2 (54)
+-- |                                 SSH-2.0-OpenSSH_9.3p1 Ubuntu-1ubuntu3.6 (22)
+-- |                                 SSH-2.0-OpenSSH_9.0p1 Ubuntu-1ubuntu8.7 (15)
+-- |                                 SSH-2.0-OpenSSH_9.2p1 (7)
+-- |                                 SSH-2.0-OpenSSH_9.3 (3)
+-- |                                 SSH-2.0-OpenSSH_9.5 FreeBSD-20240806 (1)
+-- |_                                SSH-2.0-OpenSSH_9.5 (1)
 
 -- Used parts of the code from Kris Katterjohn's ssh2-enum-algos script
 author = "Adel '0x4d31' Karimi and Daniel Roberson"
@@ -39,18 +47,23 @@ portrule = shortport.port_or_service(22, "ssh")
 local output = function(parsed)
   local out = stdnse.output_table()
 
-  local hasshdbfile = stdnse.get_script_args("database")
-  if not hasshdbfile then
-    hasshdbfile = "nselib/data/hasshdb"
-  else
-    hasshdbfile = "nselib/data/" .. hasshdbfile
-  end
-  stdnse.debug1("Using database file: %s", hasshdbfile)
+  local hasshdbfile
+  local skip_hasshdb = stdnse.get_script_args("skip_hasshdb")
+  if not skip_hasshdb then
+    -- Initialize hasshdb
+    hasshdbfile = stdnse.get_script_args("database")
+    if not hasshdbfile then
+      hasshdbfile = "nselib/data/hasshdb"
+    else
+      hasshdbfile = "nselib/data/" .. hasshdbfile
+    end
+    stdnse.debug1("Using database file: %s", hasshdbfile)
 
-  status, hasshdb = datafiles.parse_file(hasshdbfile, {["^%s*([^%s# ]+)[%s ]+"] ="^%s*[^%s# ]+[%s ]+(.*)"})
-  if not status then
-    stdnse.debug1("Could not open hassh database: %s", hasshdbfile)
-    return
+    status, hasshdb = datafiles.parse_file(hasshdbfile, {["^%s*([^%s# ]+)[%s ]+"] ="^%s*[^%s# ]+[%s ]+(.*)"})
+    if not status then
+      stdnse.debug1("Could not open hassh database: %s", hasshdbfile)
+      return
+    end
   end
 
   -- hasshServer
@@ -62,15 +75,26 @@ local output = function(parsed)
   local hsa = { kexAlgs, encAlgs, macAlgs, cmpAlgs }
   local hasshServerAlgs = table.concat(hsa, ';')
   local hasshServer = stdnse.tohex(openssl.md5(hasshServerAlgs))
-  out["Server Identification String"] = identificationString
   out["hasshServer"] = hasshServer
+  out["Server Identification String"] = identificationString
 
-  -- Display matching hasshes
-  local match = hasshdb[string.lower(hasshServer)]
-  if match then
-    out["hasshServer Guess"] = match
-  else
-    out["hassServer Guess"] = "Unknown."
+  -- Query hasshdb and display results
+  if not skip_hasshdb then
+    local match = hasshdb[string.lower(hasshServer)]
+    if match then
+      local guess = match:gsub(" || ", "\n                                ")
+      local escapedIdentificationString = identificationString:gsub("%p", "%%%1")
+      guess = guess:gsub(escapedIdentificationString, "--> " .. identificationString)
+      guess = "           " .. guess .. " "
+      local escapedArrow = string.gsub("    -->", "%p", "%%%1")
+      guess = guess:gsub(escapedArrow, "-->")
+      out["hasshServer Guess"] = guess
+      if not string.find(guess, " --> ") then
+        out["hasshServer Warning"] = "hasshServer does not match any Server Identification strings within " .. hasshdbfile ..". Please report hasshServer and Server Identification String to dev () nmap.org"
+      end
+    else
+      out["hasshServer Guess"] = "Unknown. Please report hasshServer and Server Identification String to dev () nmap.org"
+    end
   end
 
   -- Display algorithms if verbosity is set

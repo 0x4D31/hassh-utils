@@ -15,10 +15,10 @@ Server Fingerprint) and hasshServerAlgorithms for the target SSH
 server. The resulting hassh is compared to a list of known hasshServer
 values to attempt to fingerprint it.
 
-
 Basic usage:
+
 ```
- % nmap --script ssh-hassh.nse -p 22  192.168.10.136
+nmap --script ssh-hassh.nse -p 22  192.168.10.136
 
 Starting Nmap 7.60 ( https://nmap.org ) at 2019-09-30 20:45 PDT
 Nmap scan report for mikrotik.planethacker.net (192.168.10.136)
@@ -37,18 +37,23 @@ Nmap done: 1 IP address (1 host up) scanned in 0.30 seconds
 
 A database file can be specified. See [Nmap Documentation](https://nmap.org/book/data-files-replacing-data-files.html) for more info on how Nmap handles custom data files. Generally, placing databases in /usr/share/nmap/nselib/data/ will work:
 ```
- % nmap --script ssh-hassh.nse --script-args database=hasshd 192.168.10.136
+nmap --script ssh-hassh.nse --script-args database=hasshd 192.168.10.136
 ```
 
+Database lookups can be skipped using the `skip_hasshdb` script argument:
+
+```
+nmap --script ssh-hassh.nse --script-args skip_hasshdb 192.168.10.136
+```
 
 The client's identification string can also be specified if you want to use something besides the default value of _SSH-2.0-Nmap-SSH-HASSH_. Note: this must be formatted correctly; SSH-VERSION-STRING:
 ```
-% nmap --script ssh-hassh.nse --script-args client_string=SSH-2.0-asdf -p 22 192.168.10.136
+nmap --script ssh-hassh.nse --script-args client_string=SSH-2.0-asdf -p 22 192.168.10.136
 ```
 
 Increasing the verbosity with -v by will display the algorithms:
 ```
- % nmap --script ssh-hassh.nse -p 22 --open -Pn 192.168.10.136 -oX test.xml -v
+nmap --script ssh-hassh.nse -p 22 --open -Pn 192.168.10.136 -oX test.xml -v
 
 ...snip...
 
@@ -65,7 +70,7 @@ PORT   STATE SERVICE
 
 Increasing the verbosity higher with -vv will list the algorithms:
 ```
- % nmap --script ssh-hassh.nse -p 22 --open -Pn 192.168.10.136 -oX test.xml -vv
+nmap --script ssh-hassh.nse -p 22 --open -Pn 192.168.10.136 -oX test.xml -vv
 
 ...snip...
 
