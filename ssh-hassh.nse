@@ -90,10 +90,10 @@ local output = function(parsed)
       guess = guess:gsub(escapedArrow, "-->")
       out["hasshServer Guess"] = guess
       if not string.find(guess, " --> ") then
-        out["hasshServer Warning"] = "hasshServer does not match any Server Identification strings within " .. hasshdbfile ..". Please report hasshServer and Server Identification String to dev () nmap.org"
+        out["hasshServer Warning"] = "hasshServer does not match any Server Identification strings within " .. hasshdbfile ..". Please report hasshServer and Server Identification String to the developers."
       end
     else
-      out["hasshServer Guess"] = "Unknown. Please report hasshServer and Server Identification String to dev () nmap.org"
+      out["hasshServer Guess"] = "Unknown. Please report hasshServer and Server Identification String to the developers."
     end
   end
 
